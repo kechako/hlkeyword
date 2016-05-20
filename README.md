@@ -1,7 +1,7 @@
 hlkeyword
 ==========
 
-`hlkeyword` highlight the specified keyword.
+`hlkeyword` highlights the specified keyword.
 
 Install
 ----------
