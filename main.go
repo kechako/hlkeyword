@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"os"
 	"strings"
@@ -10,18 +11,50 @@ import (
 	"github.com/pkg/errors"
 )
 
+var colorTable = map[string]color.Attribute{
+	"black":   color.FgBlack,
+	"red":     color.FgRed,
+	"green":   color.FgGreen,
+	"yellow":  color.FgYellow,
+	"blue":    color.FgBlue,
+	"magenta": color.FgMagenta,
+	"cyan":    color.FgCyan,
+	"white":   color.FgWhite,
+}
+var bgColorTable = map[string]color.Attribute{
+	"black":   color.BgBlack,
+	"red":     color.BgRed,
+	"green":   color.BgGreen,
+	"yellow":  color.BgYellow,
+	"blue":    color.BgBlue,
+	"magenta": color.BgMagenta,
+	"cyan":    color.BgCyan,
+	"white":   color.BgWhite,
+}
+
 // main
 func _main() (int, error) {
 	var err error
 
-	if len(os.Args) < 2 {
+	colorName := flag.String("color", "red", "Highlight color. (black, red, green, yellow, blue, magenta, cyan, white)")
+	bgColorName := flag.String("bgcolor", "", "Highlight background color. (black, red, green, yellow, blue, magenta, cyan, white)")
+	flag.Parse()
+
+	colorAttr, ok := colorTable[*colorName]
+	if !ok {
+		return 1, fmt.Errorf("Invalid color is specified.")
+	}
+	c := color.New(colorAttr)
+
+	args := flag.Args()
+	if len(args) < 1 {
 		return 1, fmt.Errorf("Keyword is not specified.")
 	}
-	keyword := os.Args[1]
+	keyword := args[0]
 
 	var fp *os.File
-	if len(os.Args) > 2 {
-		fp, err = os.Open(os.Args[2])
+	if len(args) > 1 {
+		fp, err = os.Open(args[1])
 		if err != nil {
 			return 2, errors.Wrap(err, "Can not open file.")
 		}
@@ -35,7 +68,7 @@ func _main() (int, error) {
 		text := scanner.Text()
 		for index := strings.Index(text, keyword); index >= 0; index = strings.Index(text, keyword) {
 			fmt.Print(text[0:index])
-			color.Red(keyword)
+			c.Print(keyword)
 			text = text[index+len(keyword) : len(text)]
 		}
 		if len(text) > 0 {
